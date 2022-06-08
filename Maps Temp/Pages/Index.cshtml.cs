@@ -50,7 +50,28 @@ namespace Maps_Temp.Pages
                 return;
             }
             // routing service API
+            // /privateapi/routingsvc/route?start={start}&end={end}&routeType={routeType}&token={token}
 
+            // coords are in lat,long
+            string startCoords = "1.320981,103.844150";
+            string endCoords = "1.326762,103.8559";
+
+            //  4 routeType available: walk, drive , cycle and pt
+            string routeType = "pt"; // public transport
+
+            //current date time
+            string date = new DateTime().ToString("yyyy-MM-dd");
+            string time = new DateTime().ToString("HH:mm:ss");
+
+            // mode TRANSIT, BUS, RAIL
+            string mode = "RAIL";
+
+            // url and params
+            string routingUrl = "https://developers.onemap.sg/privateapi/routingsvc/route?";
+            string routinParams = $@"start={startCoords}&end={endCoords}&routeType={routeType}&token={token.access_token}&date={date}&time={time}&mode={mode}";
+            var httpResponseMessage2 = await httpClient.GetAsync(routingUrl + routinParams);
+            string routeData = await httpResponseMessage2.Content.ReadAsStringAsync();
+            
         }
     }
 }
