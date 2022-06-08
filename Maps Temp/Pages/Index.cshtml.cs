@@ -30,18 +30,19 @@ namespace Maps_Temp.Pages
 
         public async Task OnGet()
         {
+            // create auth info post body
             string authJson = $@"{{""email"":""{_myConfigSettings.OneMapEmail}"",""password"":""{_myConfigSettings.OneMapPwd}"" }}";
-            //string authJson = string.Format(authTemplate, _myConfigSettings.OneMapEmail, _myConfigSettings.OneMapPwd);
-            var authInfo = new StringContent(
-                authJson,
-                Encoding.UTF8,
-                Application.Json);
+            var authInfo = new StringContent(authJson, Encoding.UTF8, Application.Json);
 
             var httpClient = _httpClientFactory.CreateClient();
+
+            #region Get Token
+            // make post request and wait for response- authInfo in postbody
             var httpResponseMessage = await httpClient.PostAsync("https://developers.onemap.sg/privateapi/auth/post/getToken", authInfo);
 
+            // if web call fails, don't proceed
             if (!httpResponseMessage.IsSuccessStatusCode)
-            {
+            { 
                 return;
             }
             OneMapToken? token = JsonSerializer.Deserialize<OneMapToken>(await httpResponseMessage.Content.ReadAsStringAsync());
@@ -49,7 +50,9 @@ namespace Maps_Temp.Pages
             {
                 return;
             }
-            // routing service API
+            #endregion
+
+            #region routing service API
             // /privateapi/routingsvc/route?start={start}&end={end}&routeType={routeType}&token={token}
 
             // coords are in lat,long
@@ -69,9 +72,12 @@ namespace Maps_Temp.Pages
             // url and params
             string routingUrl = "https://developers.onemap.sg/privateapi/routingsvc/route?";
             string routinParams = $@"start={startCoords}&end={endCoords}&routeType={routeType}&token={token.access_token}&date={date}&time={time}&mode={mode}";
+            // make get request
             var httpResponseMessage2 = await httpClient.GetAsync(routingUrl + routinParams);
+
+            //put data in string
             string routeData = await httpResponseMessage2.Content.ReadAsStringAsync();
-            
+            #endregion
         }
     }
 }
